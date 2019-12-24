@@ -1,0 +1,15 @@
+.terraform
+.terragrunt-cache
+*.log
+secret.tfvars
+**/*.pub
+**/*.pyc
+**/*.tmp
+temp/
+*.pem
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.*
+deps
+*.iml
+.idea/
