@@ -88,6 +88,13 @@ module "nginx" {
   cloud_watch_retention_in_days = 1
   service_name                  = "nginx"
   ecs_service_role              = module.iam.ecs_service_role
+  enabled = true
+  max_capacity = 4
+  min_capacity = 1
+  scale_down_adjustment = -1
+  scale_down_cooldown = 300
+  scale_up_adjustment = 1
+  scale_up_cooldown = 60
 }
 ######################################################################################
 //module "config" {

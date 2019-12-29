@@ -43,3 +43,11 @@ variable "task_role_arn" {}
 variable "ecs_service_role" {}
 variable "ecs_cluster_id" {}
 variable "cloud_watch_retention_in_days" {}
+#---------------------------------------------autoscaling
+variable "enabled" {}
+variable "max_capacity" {}
+variable "min_capacity" {}
+variable "scale_up_cooldown" {}
+variable "scale_up_adjustment" {}
+variable "scale_down_cooldown" {}
+variable "scale_down_adjustment" {}

@@ -163,5 +163,94 @@ resource "aws_ecs_service" "ecs_service" {
     field = "memory"
   }
 }
+################## AUTO SCALING ################################################
 
+locals {
+  cluster_name = "${var.application_name}-${var.environment}"
+  service_name = "${var.application_name}-${var.environment}-${var.service_name}"
+  aws_appautoscaling_policy_up_name = "${local.cluster_name}-${var.service_name}-scaleUp"
+  aws_appautoscaling_policy_down_name = "${local.cluster_name}-${var.service_name}-scaleDown"
+}
 
+resource "aws_appautoscaling_target" "default" {
+  count              = var.enabled ? 1 : 0
+  service_namespace  = "ecs"
+  resource_id        = "service/${local.cluster_name}/${local.service_name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  min_capacity       = var.min_capacity
+  max_capacity       = var.max_capacity
+}
+
+resource "aws_appautoscaling_policy" "up" {
+  count              = var.enabled ? 1 : 0
+  name               = local.aws_appautoscaling_policy_up_name
+  service_namespace  = "ecs"
+  resource_id        = "service/${local.cluster_name}/${local.service_name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = var.scale_up_cooldown
+    metric_aggregation_type = "Average"
+
+    step_adjustment {
+      metric_interval_lower_bound = 0
+      scaling_adjustment          = var.scale_up_adjustment
+    }
+  }
+}
+
+resource "aws_appautoscaling_policy" "down" {
+  count              = var.enabled ? 1 : 0
+  name               = local.aws_appautoscaling_policy_down_name
+  service_namespace  = "ecs"
+  resource_id        = "service/${local.cluster_name}/${local.service_name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = var.scale_down_cooldown
+    metric_aggregation_type = "Average"
+
+    step_adjustment {
+      metric_interval_upper_bound = 0
+      scaling_adjustment          = var.scale_down_adjustment
+    }
+  }
+}
+#-----------------------------------------------------------------------------
+
+resource "aws_cloudwatch_metric_alarm" "scaleUp" {
+  alarm_name          = "terraform-scaleUp"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "80"
+
+//  dimensions = {
+//    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
+//  }
+
+  alarm_description = "This metric monitors ec2 cpu utilization"
+  alarm_actions     = [aws_appautoscaling_policy.up[0].arn]
+}
+resource "aws_cloudwatch_metric_alarm" "scaleDown" {
+  alarm_name          = "terraform-scaleDown"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "40"
+
+  //  dimensions = {
+  //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
+  //  }
+
+  alarm_description = "This metric monitors ec2 cpu utilization"
+  alarm_actions     = [aws_appautoscaling_policy.down[0].arn]
+}
