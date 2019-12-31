@@ -62,39 +62,90 @@ module "ecs" {
 
 module "nginx" {
   source = "./service_template"
-
+  #--------------- ELB variables
+  internal                      = false
   alb_port                      = 80
   alb_protocol                  = "HTTP"
-  alb_security_group            = module.security.lb_sg
-  apm_ecr_url                   = ""
-  application_name              = var.application_name
-  aws_region_name               = var.awsRegion
+  target_group_prefix           = "nginx"
+  #--------------- ECS SERVICE variables
+  service_name                  = "nginx"
+  tasks_per_service             = 1
   container_port                = 80
   container_protocol            = "HTTP"
-  docker_tag                    = "latest"
-  domain                        = "endava-test-domain.be"
-  ecs_cluster_id                = module.ecs.ecs_cluster_id
-  environment                   = var.environment
   environment_variables         = ""
-  internal                      = false
-  merged_cluster_tags           = module.ecs.merged_cluster_tags
-  subnets                       = module.network.app_subnets
-  tag_names                     = module.ecs.tag_names
-  tags                          = module.ecs.tags
-  target_group_prefix           = "nginx"
-  task_role_arn                 = module.iam.ecs_service_role
-  tasks_per_service             = 1
-  vpc_id                        = module.network.vpc_id
+  docker_tag                    = "latest"
+  #--------------- Route53 variables
+  domain                        = "endava-test-domain.be"
+  #--------------- CloudWatch variables
   cloud_watch_retention_in_days = 1
-  service_name                  = "nginx"
-  ecs_service_role              = module.iam.ecs_service_role
-  enabled = true
+  #--------------- autoscaling variables
   max_capacity = 4
   min_capacity = 1
   scale_down_adjustment = -1
   scale_down_cooldown = 300
   scale_up_adjustment = 1
   scale_up_cooldown = 60
+  #--------------- GLOGAL variables
+  application_name              = var.application_name
+  environment                   = var.environment
+  aws_region_name               = var.awsRegion
+  apm_ecr_url                   = ""
+  #--------------- IAM variables
+  task_role_arn                 = module.iam.ecs_service_role
+  ecs_service_role              = module.iam.ecs_service_role
+  #--------------- NETWORK variables
+  vpc_id                        = module.network.vpc_id
+  subnets                       = module.network.app_subnets
+  alb_security_group            = module.security.lb_sg
+  #--------------- ECS variables
+  ecs_cluster_id                = module.ecs.ecs_cluster_id
+  tag_names                     = module.ecs.tag_names
+  tags                          = module.ecs.tags
+  merged_cluster_tags           = module.ecs.merged_cluster_tags
+  }
+
+module "httpd" {
+  source = "./service_template"
+  #--------------- ELB variables
+  internal                      = false
+  alb_port                      = 80
+  alb_protocol                  = "HTTP"
+  target_group_prefix           = "httpd"
+  #--------------- ECS SERVICE variables
+  service_name                  = "httpd"
+  tasks_per_service             = 1
+  container_port                = 80
+  container_protocol            = "HTTP"
+  environment_variables         = ""
+  docker_tag                    = "latest"
+  #--------------- Route53 variables
+  domain                        = "endava-test-domain.be"
+  #--------------- CloudWatch variables
+  cloud_watch_retention_in_days = 1
+  #--------------- autoscaling variables
+  max_capacity = 4
+  min_capacity = 1
+  scale_down_adjustment = -1
+  scale_down_cooldown = 300
+  scale_up_adjustment = 1
+  scale_up_cooldown = 60
+  #--------------- GLOGAL variables
+  application_name              = var.application_name
+  environment                   = var.environment
+  aws_region_name               = var.awsRegion
+  apm_ecr_url                   = ""
+  #--------------- IAM variables
+  task_role_arn                 = module.iam.ecs_service_role
+  ecs_service_role              = module.iam.ecs_service_role
+  #--------------- NETWORK variables
+  vpc_id                        = module.network.vpc_id
+  subnets                       = module.network.app_subnets
+  alb_security_group            = module.security.lb_sg
+  #--------------- ECS variables
+  ecs_cluster_id                = module.ecs.ecs_cluster_id
+  tag_names                     = module.ecs.tag_names
+  tags                          = module.ecs.tags
+  merged_cluster_tags           = module.ecs.merged_cluster_tags
 }
 ######################################################################################
 //module "config" {

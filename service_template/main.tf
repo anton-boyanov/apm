@@ -107,7 +107,7 @@ data "template_file" "container_definition" {
   vars = {
     environment = jsonencode(var.environment_variables)
     //    image                 = "${var.apm_ecr_url}/${var.application_name}-${var.service_name}-service:${var.docker_tag}"
-    image                 = "nginx"
+    image                 = var.service_name #TODO
     name                  = "${var.application_name}-${var.environment}-${var.service_name}"
     containerPort         = local.container_port
     awslogs-group         = module.log_group.log_group
@@ -173,16 +173,16 @@ locals {
 }
 
 resource "aws_appautoscaling_target" "default" {
-  count              = var.enabled ? 1 : 0
   service_namespace  = "ecs"
   resource_id        = "service/${local.cluster_name}/${local.service_name}"
   scalable_dimension = "ecs:service:DesiredCount"
   min_capacity       = var.min_capacity
   max_capacity       = var.max_capacity
+
+  depends_on = [aws_ecs_service.ecs_service]
 }
 
 resource "aws_appautoscaling_policy" "up" {
-  count              = var.enabled ? 1 : 0
   name               = local.aws_appautoscaling_policy_up_name
   service_namespace  = "ecs"
   resource_id        = "service/${local.cluster_name}/${local.service_name}"
@@ -198,10 +198,10 @@ resource "aws_appautoscaling_policy" "up" {
       scaling_adjustment          = var.scale_up_adjustment
     }
   }
+  depends_on = [aws_ecs_service.ecs_service]
 }
 
 resource "aws_appautoscaling_policy" "down" {
-  count              = var.enabled ? 1 : 0
   name               = local.aws_appautoscaling_policy_down_name
   service_namespace  = "ecs"
   resource_id        = "service/${local.cluster_name}/${local.service_name}"
@@ -217,6 +217,7 @@ resource "aws_appautoscaling_policy" "down" {
       scaling_adjustment          = var.scale_down_adjustment
     }
   }
+  depends_on = [aws_ecs_service.ecs_service]
 }
 #-----------------------------------------------------------------------------
 
@@ -235,7 +236,7 @@ resource "aws_cloudwatch_metric_alarm" "scaleUp" {
 //  }
 
   alarm_description = "This metric monitors ec2 cpu utilization"
-  alarm_actions     = [aws_appautoscaling_policy.up[0].arn]
+  alarm_actions     = [aws_appautoscaling_policy.up.arn]
 }
 resource "aws_cloudwatch_metric_alarm" "scaleDown" {
   alarm_name          = "terraform-scaleDown"
@@ -252,5 +253,5 @@ resource "aws_cloudwatch_metric_alarm" "scaleDown" {
   //  }
 
   alarm_description = "This metric monitors ec2 cpu utilization"
-  alarm_actions     = [aws_appautoscaling_policy.down[0].arn]
+  alarm_actions     = [aws_appautoscaling_policy.down.arn]
 }
