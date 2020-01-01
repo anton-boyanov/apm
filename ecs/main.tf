@@ -73,7 +73,7 @@ locals {
   tags = {
     "${local.tag_names["environment"]}" = var.environment
     "${local.tag_names["application"]}" = var.application_name
-    "${local.tag_names["creator"]}"    = "terraform"
+    "${local.tag_names["creator"]}"     = "terraform"
   }
   cluster_tags = {
     "${local.tag_names["cluster_name"]}" = local.cluster_name
@@ -97,12 +97,13 @@ locals {
 }
 locals {
   ecs_instance_type_map = {
-    low    = "c5.large"
+    low = "t2.micro"
+    #low    = "c5.large"
     medium = "c5.xlarge"
     high   = "c5.2xlarge"
   }
   ecs_additional_allowed_ec2_map = {
-    low    = "1"
+    low    = "2"
     medium = var.enough_instances_per_cluster
     high   = var.enough_instances_per_cluster
   }
@@ -126,14 +127,6 @@ locals {
 locals {
   cluster_name     = "${var.application_name}-${var.environment}"
   cloud_watch_path = "${var.application_name}/${var.environment}"
-}
-
-resource "aws_ecs_cluster" "cluster" {
-  name = local.cluster_name
-
-  depends_on = [
-    "null_resource.cloud_watch_wait"
-  ]
 }
 
 resource "aws_launch_configuration" "cluster" {
@@ -168,8 +161,9 @@ resource "aws_autoscaling_group" "cluster" {
   launch_configuration = aws_launch_configuration.cluster.name
   min_size             = local.cluster_minimum_size
   max_size             = local.cluster_maximum_size
-  desired_capacity     = local.cluster_desired_capacity
+//  desired_capacity     = local.cluster_desired_capacity
   tags                 = data.null_data_source.tags.*.outputs
+  depends_on = [aws_launch_configuration.cluster]
 }
 
 resource "aws_autoscaling_lifecycle_hook" "host_lifecycle_hook" {
@@ -180,4 +174,39 @@ resource "aws_autoscaling_lifecycle_hook" "host_lifecycle_hook" {
   lifecycle_transition    = "autoscaling:EC2_INSTANCE_TERMINATING"
   notification_target_arn = ""
   role_arn                = ""
+  depends_on = [aws_autoscaling_group.cluster]
+}
+################## AUTO SCALING ECS TASK ################################################
+resource "aws_ecs_capacity_provider" "cluster" {
+  name = "${local.cluster_name}-ecs-capacity-provider"
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = aws_autoscaling_group.cluster.arn
+    managed_termination_protection = "DISABLED"
+
+    managed_scaling {
+      maximum_scaling_step_size = 1000
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 80
+    }
+  }
+
+  depends_on = [aws_autoscaling_group.cluster]
+}
+#-----------------------------------------------------------------------------------------
+
+resource "aws_ecs_cluster" "cluster" {
+  name               = local.cluster_name
+  capacity_providers = [aws_ecs_capacity_provider.cluster.name]
+  default_capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.cluster.name
+    base = 2
+    weight = 100
+  }
+
+  depends_on = [
+    null_resource.cloud_watch_wait,
+    aws_ecs_capacity_provider.cluster
+  ]
 }

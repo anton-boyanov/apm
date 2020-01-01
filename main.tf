@@ -69,7 +69,7 @@ module "nginx" {
   target_group_prefix           = "nginx"
   #--------------- ECS SERVICE variables
   service_name                  = "nginx"
-  tasks_per_service             = 1
+  tasks_per_service             = 3
   container_port                = 80
   container_protocol            = "HTTP"
   environment_variables         = ""
@@ -79,8 +79,8 @@ module "nginx" {
   #--------------- CloudWatch variables
   cloud_watch_retention_in_days = 1
   #--------------- autoscaling variables
-  max_capacity = 4
-  min_capacity = 1
+  max_capacity = 6
+  min_capacity = 2
   scale_down_adjustment = -1
   scale_down_cooldown = 300
   scale_up_adjustment = 1
@@ -113,7 +113,7 @@ module "httpd" {
   target_group_prefix           = "httpd"
   #--------------- ECS SERVICE variables
   service_name                  = "httpd"
-  tasks_per_service             = 1
+  tasks_per_service             = 2
   container_port                = 80
   container_protocol            = "HTTP"
   environment_variables         = ""
@@ -124,7 +124,7 @@ module "httpd" {
   cloud_watch_retention_in_days = 1
   #--------------- autoscaling variables
   max_capacity = 4
-  min_capacity = 1
+  min_capacity = 2
   scale_down_adjustment = -1
   scale_down_cooldown = 300
   scale_up_adjustment = 1

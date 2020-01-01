@@ -3,7 +3,7 @@
     "cpu": 512,
     "essential": true,
     "image": "${image}",
-    "memoryReservation": 512,
+    "memoryReservation": 490,
     "name": "${name}",
     "portMappings": [
       {

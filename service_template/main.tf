@@ -163,13 +163,12 @@ resource "aws_ecs_service" "ecs_service" {
     field = "memory"
   }
 }
-################## AUTO SCALING ################################################
+################## AUTO SCALING ECS TASK ################################################
 
 locals {
   cluster_name = "${var.application_name}-${var.environment}"
   service_name = "${var.application_name}-${var.environment}-${var.service_name}"
-  aws_appautoscaling_policy_up_name = "${local.cluster_name}-${var.service_name}-scaleUp"
-  aws_appautoscaling_policy_down_name = "${local.cluster_name}-${var.service_name}-scaleDown"
+  aws_appautoscaling_policy_prefix = "${local.cluster_name}-${var.service_name}"
 }
 
 resource "aws_appautoscaling_target" "default" {
@@ -182,8 +181,8 @@ resource "aws_appautoscaling_target" "default" {
   depends_on = [aws_ecs_service.ecs_service]
 }
 
-resource "aws_appautoscaling_policy" "up" {
-  name               = local.aws_appautoscaling_policy_up_name
+resource "aws_appautoscaling_policy" "cpuUp" {
+  name               = "${local.aws_appautoscaling_policy_prefix}-ScaleUp-CPU"
   service_namespace  = "ecs"
   resource_id        = "service/${local.cluster_name}/${local.service_name}"
   scalable_dimension = "ecs:service:DesiredCount"
@@ -201,8 +200,45 @@ resource "aws_appautoscaling_policy" "up" {
   depends_on = [aws_ecs_service.ecs_service]
 }
 
-resource "aws_appautoscaling_policy" "down" {
-  name               = local.aws_appautoscaling_policy_down_name
+resource "aws_appautoscaling_policy" "cpuDown" {
+  name               = "${local.aws_appautoscaling_policy_prefix}-ScaleDown-CPU"
+  service_namespace  = "ecs"
+  resource_id        = "service/${local.cluster_name}/${local.service_name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = var.scale_down_cooldown
+    metric_aggregation_type = "Average"
+
+    step_adjustment {
+      metric_interval_upper_bound = 0
+      scaling_adjustment          = var.scale_down_adjustment
+    }
+  }
+  depends_on = [aws_ecs_service.ecs_service]
+}
+resource "aws_appautoscaling_policy" "memUp" {
+  name               = "${local.aws_appautoscaling_policy_prefix}-ScaleUp-MEM"
+  service_namespace  = "ecs"
+  resource_id        = "service/${local.cluster_name}/${local.service_name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+
+  step_scaling_policy_configuration {
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = var.scale_up_cooldown
+    metric_aggregation_type = "Average"
+
+    step_adjustment {
+      metric_interval_lower_bound = 0
+      scaling_adjustment          = var.scale_up_adjustment
+    }
+  }
+  depends_on = [aws_ecs_service.ecs_service]
+}
+
+resource "aws_appautoscaling_policy" "memDown" {
+  name               = "${local.aws_appautoscaling_policy_prefix}-ScaleDown-MEM"
   service_namespace  = "ecs"
   resource_id        = "service/${local.cluster_name}/${local.service_name}"
   scalable_dimension = "ecs:service:DesiredCount"
@@ -221,8 +257,8 @@ resource "aws_appautoscaling_policy" "down" {
 }
 #-----------------------------------------------------------------------------
 
-resource "aws_cloudwatch_metric_alarm" "scaleUp" {
-  alarm_name          = "terraform-scaleUp"
+resource "aws_cloudwatch_metric_alarm" "scaleUpCPU" {
+  alarm_name          = "${local.service_name}-scaleUp-CPU"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -230,16 +266,29 @@ resource "aws_cloudwatch_metric_alarm" "scaleUp" {
   period              = "120"
   statistic           = "Average"
   threshold           = "80"
-
 //  dimensions = {
 //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
 //  }
-
-  alarm_description = "This metric monitors ec2 cpu utilization"
-  alarm_actions     = [aws_appautoscaling_policy.up.arn]
+  alarm_description = "This metric monitors task cpu utilization"
+  alarm_actions     = [aws_appautoscaling_policy.cpuUp.arn]
 }
-resource "aws_cloudwatch_metric_alarm" "scaleDown" {
-  alarm_name          = "terraform-scaleDown"
+resource "aws_cloudwatch_metric_alarm" "scaleUpMemory" {
+  alarm_name          = "${local.service_name}-scaleUp-Memory"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "80"
+  //  dimensions = {
+  //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
+  //  }
+  alarm_description = "This metric monitors task memory utilization"
+  alarm_actions     = [aws_appautoscaling_policy.memUp.arn]
+}
+resource "aws_cloudwatch_metric_alarm" "scaleDownCPU" {
+  alarm_name          = "${local.service_name}-scaleDown-CPU"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods  = "2"
   metric_name         = "CPUUtilization"
@@ -247,11 +296,24 @@ resource "aws_cloudwatch_metric_alarm" "scaleDown" {
   period              = "120"
   statistic           = "Average"
   threshold           = "40"
-
   //  dimensions = {
   //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
   //  }
-
-  alarm_description = "This metric monitors ec2 cpu utilization"
-  alarm_actions     = [aws_appautoscaling_policy.down.arn]
+  alarm_description = "This metric monitors task cpu utilization"
+  alarm_actions     = [aws_appautoscaling_policy.cpuDown.arn]
+}
+resource "aws_cloudwatch_metric_alarm" "scaleDownMemory" {
+  alarm_name          = "${local.service_name}-scaleDown-Memory"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "40"
+  //  dimensions = {
+  //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
+  //  }
+  alarm_description = "This metric monitors task memory utilization"
+  alarm_actions     = [aws_appautoscaling_policy.memDown.arn]
 }
