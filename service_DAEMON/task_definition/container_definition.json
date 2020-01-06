@@ -1,0 +1,25 @@
+[
+  {
+    "cpu": 512,
+    "essential": true,
+    "environment" : ${environment},
+    "image": "${image}",
+    "memoryReservation": 490,
+    "name": "${name}",
+    "portMappings": [
+      {
+        "containerPort": ${containerPort}
+      }
+    ],
+    "mountPoints": [],
+    "volumesFrom": [],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${awslogs-group}",
+        "awslogs-region": "${awslogs-region}",
+        "awslogs-stream-prefix": "${awslogs-stream-prefix}"
+      }
+    }
+  }
+]

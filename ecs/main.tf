@@ -97,8 +97,8 @@ locals {
 }
 locals {
   ecs_instance_type_map = {
-    low = "t2.micro"
-    #low    = "c5.large"
+//    low = "t2.micro"
+    low    = "c5.large"
     medium = "c5.xlarge"
     high   = "c5.2xlarge"
   }
@@ -161,8 +161,8 @@ resource "aws_autoscaling_group" "cluster" {
   launch_configuration = aws_launch_configuration.cluster.name
   min_size             = local.cluster_minimum_size
   max_size             = local.cluster_maximum_size
-//  desired_capacity     = local.cluster_desired_capacity
-  tags                 = data.null_data_source.tags.*.outputs
+  //  desired_capacity     = local.cluster_desired_capacity
+  tags       = data.null_data_source.tags.*.outputs
   depends_on = [aws_launch_configuration.cluster]
 }
 
@@ -174,39 +174,147 @@ resource "aws_autoscaling_lifecycle_hook" "host_lifecycle_hook" {
   lifecycle_transition    = "autoscaling:EC2_INSTANCE_TERMINATING"
   notification_target_arn = ""
   role_arn                = ""
-  depends_on = [aws_autoscaling_group.cluster]
+  depends_on              = [aws_autoscaling_group.cluster]
 }
 ################## AUTO SCALING ECS TASK ################################################
-resource "aws_ecs_capacity_provider" "cluster" {
-  name = "${local.cluster_name}-ecs-capacity-provider"
-
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_autoscaling_group.cluster.arn
-    managed_termination_protection = "DISABLED"
-
-    managed_scaling {
-      maximum_scaling_step_size = 1000
-      minimum_scaling_step_size = 1
-      status                    = "ENABLED"
-      target_capacity           = 80
-    }
-  }
-
-  depends_on = [aws_autoscaling_group.cluster]
-}
+//resource "aws_ecs_capacity_provider" "cluster" {
+//  //  name = "${local.cluster_name}-ecs-capacity-provider1"
+//  name = aws_launch_configuration.cluster.name
+//
+//  auto_scaling_group_provider {
+//    auto_scaling_group_arn         = aws_autoscaling_group.cluster.arn
+//    managed_termination_protection = "DISABLED"
+//
+//    managed_scaling {
+//      maximum_scaling_step_size = 1000
+//      minimum_scaling_step_size = 1
+//      status                    = "ENABLED"
+//      target_capacity           = 80
+//    }
+//  }
+//
+//  depends_on = [aws_autoscaling_group.cluster]
+//}
 #-----------------------------------------------------------------------------------------
 
 resource "aws_ecs_cluster" "cluster" {
   name               = local.cluster_name
-  capacity_providers = [aws_ecs_capacity_provider.cluster.name]
-  default_capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.cluster.name
-    base = 2
-    weight = 100
-  }
+//  capacity_providers = [aws_ecs_capacity_provider.cluster.name]
+//  default_capacity_provider_strategy {
+//    capacity_provider = aws_ecs_capacity_provider.cluster.name
+//    base              = 2
+//    weight            = 100
+//  }
 
   depends_on = [
     null_resource.cloud_watch_wait,
-    aws_ecs_capacity_provider.cluster
+//    aws_ecs_capacity_provider.cluster
   ]
+}
+#-----------------------------------------------------------------------------
+locals {
+//  cluster_name = "${var.application_name}-${var.environment}"
+  aws_appautoscaling_policy_prefix = local.cluster_name
+}
+
+resource "aws_autoscaling_policy" "cpuClusterUp" {
+  name                   = "${local.aws_appautoscaling_policy_prefix}-ScaleUp-CPU"
+  scaling_adjustment     = 100
+  adjustment_type        = "PercentChangeInCapacity"
+//  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = aws_autoscaling_group.cluster.name
+  depends_on = [aws_autoscaling_group.cluster]
+}
+
+resource "aws_autoscaling_policy" "cpuClusterDown" {
+  name                   = "${local.aws_appautoscaling_policy_prefix}-ScaleDown-CPU"
+  scaling_adjustment     = -50
+  adjustment_type        = "PercentChangeInCapacity"
+//  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = aws_autoscaling_group.cluster.name
+  depends_on = [aws_autoscaling_group.cluster]
+}
+
+resource "aws_autoscaling_policy" "memClusterUp" {
+  name                   = "${local.aws_appautoscaling_policy_prefix}-ScaleUp-MEM"
+  scaling_adjustment     = 100
+  adjustment_type        = "PercentChangeInCapacity"
+//  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = aws_autoscaling_group.cluster.name
+  depends_on = [aws_autoscaling_group.cluster]
+}
+
+resource "aws_autoscaling_policy" "memClusterDown" {
+  name                   = "${local.aws_appautoscaling_policy_prefix}-ScaleDown-MEM"
+  scaling_adjustment     = -50
+  adjustment_type        = "PercentChangeInCapacity"
+//  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300
+  autoscaling_group_name = aws_autoscaling_group.cluster.name
+  depends_on = [aws_autoscaling_group.cluster]
+}
+
+#-----------------------------------------------------------------------------
+resource "aws_cloudwatch_metric_alarm" "scaleClusterUpCPU" {
+  alarm_name          = "${local.cluster_name}-scaleUp-CPU"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUReservation"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "75"
+    dimensions = {
+      AutoScalingGroupName = aws_autoscaling_group.cluster.name
+    }
+  alarm_description = "This metric monitors task cpu utilization"
+  alarm_actions     = [aws_autoscaling_policy.cpuClusterUp.arn]
+}
+resource "aws_cloudwatch_metric_alarm" "scaleClusterUpMemory" {
+  alarm_name          = "${local.cluster_name}-scaleUp-Memory"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryReservation"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "75"
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.cluster.name
+  }
+  alarm_description = "This metric monitors task memory utilization"
+  alarm_actions     = [aws_autoscaling_policy.memClusterUp.arn]
+}
+resource "aws_cloudwatch_metric_alarm" "scaleClusterDownCPU" {
+  alarm_name          = "${local.cluster_name}-scaleDown-CPU"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUReservation"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "25"
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.cluster.name
+  }
+  alarm_description = "This metric monitors task cpu utilization"
+  alarm_actions     = [aws_autoscaling_policy.cpuClusterDown.arn]
+}
+resource "aws_cloudwatch_metric_alarm" "scaleClusterDownMemory" {
+  alarm_name          = "${local.cluster_name}-scaleDown-Memory"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryReservation"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "25"
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.cluster.name
+  }
+  alarm_description = "This metric monitors task memory utilization"
+  alarm_actions     = [aws_autoscaling_policy.memClusterDown.arn]
 }

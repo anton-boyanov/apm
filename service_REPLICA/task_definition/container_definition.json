@@ -2,9 +2,9 @@
   {
     "cpu": 512,
     "essential": true,
-    "image": "${image}",
-    "memoryReservation": 490,
+    "memoryReservation": 512,
     "name": "${name}",
+    "image": "${image}",
     "portMappings": [
       {
         "containerPort": ${containerPort}

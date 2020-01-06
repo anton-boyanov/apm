@@ -17,7 +17,7 @@ variable "create" {
 variable "tasks_per_service" {
   description = "Number of tasks"
 }
-
+variable "scheduling_strategy" {}
 variable "apm_ecr_url" {}
 variable "environment_variables" {}
 variable "service_name" {}

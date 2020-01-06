@@ -107,7 +107,7 @@ data "template_file" "container_definition" {
   vars = {
     environment = jsonencode(var.environment_variables)
     //    image                 = "${var.apm_ecr_url}/${var.application_name}-${var.service_name}-service:${var.docker_tag}"
-    image                 = var.service_name #TODO
+    image                 = "${var.service_name}:${var.docker_tag}" #TODO
     name                  = "${var.application_name}-${var.environment}-${var.service_name}"
     containerPort         = local.container_port
     awslogs-group         = module.log_group.log_group
@@ -138,6 +138,7 @@ resource "aws_ecs_service" "ecs_service" {
   name                               = aws_ecs_task_definition.ecs_task_definition.family
   cluster                            = var.ecs_cluster_id #data.aws_ecs_cluster.ecs_cluster.arn
   task_definition                    = aws_ecs_task_definition.ecs_task_definition.arn
+  scheduling_strategy = var.scheduling_strategy
   desired_count                      = var.create ? var.tasks_per_service : 0
   deployment_minimum_healthy_percent = "100"
   deployment_maximum_percent         = "200"
