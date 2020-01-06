@@ -79,7 +79,7 @@ module "ecs" {
 //  tasks_per_service             = 3
 //  container_port                = 80
 //  container_protocol            = "HTTP"
-//  environment_variables         = ""
+//  environment_variables         = module.create_environment_variables.environment_variables
 //  docker_tag                    = "latest"
 //  #--------------- Route53 variables
 //  domain                        = "endava-test-domain.be"
@@ -124,7 +124,7 @@ module "ecs" {
 //  tasks_per_service             = 2
 //  container_port                = 80
 //  container_protocol            = "HTTP"
-//  environment_variables         = ""
+//  environment_variables         = module.create_environment_variables.environment_variables
 //  docker_tag                    = "latest"
 //  #--------------- Route53 variables
 //  domain                        = "endava-test-domain.be"
@@ -169,7 +169,7 @@ module "ecs" {
 //  tasks_per_service     = 2
 //  container_port        = 9200
 //  container_protocol    = "HTTP"
-//  environment_variables = "" #module.create_environment_variables.environment_variables
+//  environment_variables = module.create_environment_variables.environment_variables
 //  docker_tag            = "7.5.1"
 //  #--------------- Route53 variables
 //  domain = "endava-test-domain.be"
@@ -214,7 +214,7 @@ module "ecs" {
 //  tasks_per_service   = 2
 //  container_port      = 5601
 //  container_protocol  = "HTTP"
-//  environment_variables = "" #module.create_environment_variables.environment_variables
+//  environment_variables = module.create_environment_variables.environment_variables
 //  docker_tag = "7.5.1"
 //  #--------------- Route53 variables
 //  domain = "endava-test-domain.be"

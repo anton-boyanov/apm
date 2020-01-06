@@ -2,6 +2,7 @@
   {
     "cpu": 512,
     "essential": true,
+    "environment" : ${environment},
     "memoryReservation": 512,
     "name": "${name}",
     "image": "${image}",
