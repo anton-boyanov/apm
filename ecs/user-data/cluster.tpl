@@ -6,7 +6,7 @@ yum install -y awslogs jq aws-cli
 
 # Install SSM agent
 yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-start amazon-ssm-agent
+restart amazon-ssm-agent
 
 # ECS config
 {

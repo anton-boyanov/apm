@@ -1,5 +1,6 @@
+variable "cluster_maximum_size" {}
+variable "cluster_minimum_size" {}
 variable "subnets" {}
-variable "enough_instances_per_cluster" {}
 variable "max_availability_zones" {}
 variable "performance_level" {}
 variable "subnet_ids" {}

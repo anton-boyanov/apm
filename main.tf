@@ -36,24 +36,25 @@ module "create_cluster_logs" {
 
 # ENVIRONMENT VARIABLES
 module "create_environment_variables" {
-  source                        = "./environment_variables"
-  environment                   = var.environment
+  source      = "./environment_variables"
+  environment = var.environment
 }
 
 # Deploy compute resources
 
 module "ecs" {
-  source                       = "./ecs"
-  enough_instances_per_cluster = var.enough_instances_per_cluster
-  max_availability_zones       = var.max_availability_zones
-  performance_level            = var.performance_level
-  subnet_ids                   = module.network.app_subnet_ids
-  subnets                      = module.network.app_subnets
-  application_name             = var.application_name
-  environment                  = var.environment
-  key_name                     = var.key_name
-  security_group               = module.security.instance_sg
-  iam_instance_profile         = module.iam.ecs_instance_profile
+  source = "./ecs"
+  cluster_minimum_size = 2
+  cluster_maximum_size = 10
+  max_availability_zones  = var.max_availability_zones
+  performance_level       = var.performance_level
+  subnet_ids              = module.network.app_subnet_ids
+  subnets                 = module.network.app_subnets
+  application_name        = var.application_name
+  environment             = var.environment
+  key_name                = var.key_name
+  security_group          = module.security.instance_sg
+  iam_instance_profile    = module.iam.ecs_instance_profile
 
   log_group_audit            = module.create_cluster_logs.audit
   log_group_cluster          = module.create_cluster_logs.cluster
@@ -64,97 +65,98 @@ module "ecs" {
   log_group_messages         = module.create_cluster_logs.messages
   log_group_ssm_agent        = module.create_cluster_logs.ssm-agent
   log_group_ssm_agent_errors = module.create_cluster_logs.ssm-agent-errors
+
 }
 
-//module "nginx" {
-//  source = "./service_template"
-//  #--------------- ELB variables
-//  internal                      = false
-//  alb_port                      = 80
-//  alb_protocol                  = "HTTP"
-//  target_group_prefix           = "nginx"
-//  #--------------- ECS SERVICE variables
-//  scheduling_strategy   = "REPLICA"
-//  service_name                  = "nginx"
-//  tasks_per_service             = 3
-//  container_port                = 80
-//  container_protocol            = "HTTP"
-//  environment_variables         = module.create_environment_variables.environment_variables
-//  docker_tag                    = "latest"
-//  #--------------- Route53 variables
-//  domain                        = "endava-test-domain.be"
-//  #--------------- CloudWatch variables
-//  cloud_watch_retention_in_days = 1
-//  #--------------- autoscaling variables
-//  max_capacity = 6
-//  min_capacity = 2
-//  scale_down_adjustment = -1
-//  scale_down_cooldown = 300
-//  scale_up_adjustment = 1
-//  scale_up_cooldown = 60
-//  #--------------- GLOGAL variables
-//  application_name              = var.application_name
-//  environment                   = var.environment
-//  aws_region_name               = var.awsRegion
-//  apm_ecr_url                   = ""
-//  #--------------- IAM variables
-//  task_role_arn                 = module.iam.ecs_service_role
-//  ecs_service_role              = module.iam.ecs_service_role
-//  #--------------- NETWORK variables
-//  vpc_id                        = module.network.vpc_id
-//  subnets                       = module.network.app_subnets
-//  alb_security_group            = module.security.lb_sg
-//  #--------------- ECS variables
-//  ecs_cluster_id                = module.ecs.ecs_cluster_id
-//  tag_names                     = module.ecs.tag_names
-//  tags                          = module.ecs.tags
-//  merged_cluster_tags           = module.ecs.merged_cluster_tags
-//  }
-//
-//module "httpd" {
-//  source = "./service_REPLICA"
-//  #--------------- ELB variables
-//  internal                      = false
-//  alb_port                      = 80
-//  alb_protocol                  = "HTTP"
-//  target_group_prefix           = "httpd"
-//  #--------------- ECS SERVICE variables
-//  scheduling_strategy   = "REPLICA"
-//  service_name                  = "httpd"
-//  tasks_per_service             = 2
-//  container_port                = 80
-//  container_protocol            = "HTTP"
-//  environment_variables         = module.create_environment_variables.environment_variables
-//  docker_tag                    = "latest"
-//  #--------------- Route53 variables
-//  domain                        = "endava-test-domain.be"
-//  #--------------- CloudWatch variables
-//  cloud_watch_retention_in_days = 1
-//  #--------------- autoscaling variables
-//  max_capacity = 4
-//  min_capacity = 2
-//  scale_down_adjustment = -1
-//  scale_down_cooldown = 300
-//  scale_up_adjustment = 1
-//  scale_up_cooldown = 60
-//  #--------------- GLOGAL variables
-//  application_name              = var.application_name
-//  environment                   = var.environment
-//  aws_region_name               = var.awsRegion
-//  apm_ecr_url                   = ""
-//  #--------------- IAM variables
-//  task_role_arn                 = module.iam.ecs_service_role
-//  ecs_service_role              = module.iam.ecs_service_role
-//  #--------------- NETWORK variables
-//  vpc_id                        = module.network.vpc_id
-//  subnets                       = module.network.app_subnets
-//  alb_security_group            = module.security.lb_sg
-//  #--------------- ECS variables
-//  ecs_cluster_id                = module.ecs.ecs_cluster_id
-//  tag_names                     = module.ecs.tag_names
-//  tags                          = module.ecs.tags
-//  merged_cluster_tags           = module.ecs.merged_cluster_tags
-//}
+module "nginx" {
+  source = "./service_REPLICA"
+  #--------------- ELB variables
+  internal                      = false
+  alb_port                      = 80
+  alb_protocol                  = "HTTP"
+  target_group_prefix           = "nginx"
+  #--------------- ECS SERVICE variables
+  scheduling_strategy   = "REPLICA"
+  service_name                  = "nginx"
+  tasks_per_service             = 3
+  container_port                = 80
+  container_protocol            = "HTTP"
+  environment_variables         = module.create_environment_variables.environment_variables
+  docker_tag                    = "latest"
+  #--------------- Route53 variables
+  domain                        = "endava-test-domain.be"
+  #--------------- CloudWatch variables
+  cloud_watch_retention_in_days = 1
+  #--------------- autoscaling variables
+  max_capacity = 6
+  min_capacity = 2
+  scale_down_adjustment = -1
+  scale_down_cooldown = 300
+  scale_up_adjustment = 1
+  scale_up_cooldown = 60
+  #--------------- GLOGAL variables
+  application_name              = var.application_name
+  environment                   = var.environment
+  aws_region_name               = var.awsRegion
+  apm_ecr_url                   = ""
+  #--------------- IAM variables
+  task_role_arn                 = module.iam.ecs_service_role
+  ecs_service_role              = module.iam.ecs_service_role
+  #--------------- NETWORK variables
+  vpc_id                        = module.network.vpc_id
+  subnets                       = module.network.app_subnets
+  alb_security_group            = module.security.lb_sg
+  #--------------- ECS variables
+  ecs_cluster_id                = module.ecs.ecs_cluster_id
+  tag_names                     = module.ecs.tag_names
+  tags                          = module.ecs.tags
+  merged_cluster_tags           = module.ecs.merged_cluster_tags
+  }
+
+module "httpd" {
+  source = "./service_REPLICA"
+  #--------------- ELB variables
+  internal                      = false
+  alb_port                      = 80
+  alb_protocol                  = "HTTP"
+  target_group_prefix           = "httpd"
+  #--------------- ECS SERVICE variables
+  scheduling_strategy   = "REPLICA"
+  service_name                  = "httpd"
+  tasks_per_service             = 4
+  container_port                = 80
+  container_protocol            = "HTTP"
+  environment_variables         = module.create_environment_variables.environment_variables
+  docker_tag                    = "latest"
+  #--------------- Route53 variables
+  domain                        = "endava-test-domain.be"
+  #--------------- CloudWatch variables
+  cloud_watch_retention_in_days = 1
+  #--------------- autoscaling variables
+  max_capacity = 6
+  min_capacity = 2
+  scale_down_adjustment = -1
+  scale_down_cooldown = 300
+  scale_up_adjustment = 1
+  scale_up_cooldown = 60
+  #--------------- GLOGAL variables
+  application_name              = var.application_name
+  environment                   = var.environment
+  aws_region_name               = var.awsRegion
+  apm_ecr_url                   = ""
+  #--------------- IAM variables
+  task_role_arn                 = module.iam.ecs_service_role
+  ecs_service_role              = module.iam.ecs_service_role
+  #--------------- NETWORK variables
+  vpc_id                        = module.network.vpc_id
+  subnets                       = module.network.app_subnets
+  alb_security_group            = module.security.lb_sg
+  #--------------- ECS variables
+  ecs_cluster_id                = module.ecs.ecs_cluster_id
+  tag_names                     = module.ecs.tag_names
+  tags                          = module.ecs.tags
+  merged_cluster_tags           = module.ecs.merged_cluster_tags
+}
 
 //module "elasticsearch" {
 //  source = "./service_REPLICA"
@@ -245,7 +247,7 @@ module "ecs" {
 //  tags                = module.ecs.tags
 //  merged_cluster_tags = module.ecs.merged_cluster_tags
 //}
-
+//
 module "filebeat" {
   source = "./service_DAEMON"
   #--------------- ELB variables

@@ -143,7 +143,7 @@ resource "aws_ecs_service" "ecs_service" {
   deployment_maximum_percent         = "200"
   health_check_grace_period_seconds  = "240"
   //  iam_role                           = "arn:aws:iam::791550111152:role/terraform-20190926194703502800000001"
-  //  iam_role   = data.aws_iam_role.cluster_service_role.arn
+//    iam_role   = data.aws_iam_role.cluster_service_role.arn
   iam_role   = var.ecs_service_role
   depends_on = ["null_resource.alb_exists"]
 

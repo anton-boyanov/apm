@@ -32,7 +32,7 @@ data "template_file" "ecs_service_role_policy" {
     template= file("iam/ecs_service_role_policy.tpl")
 }
 resource "aws_iam_role" "ecs_service_role" {
-//    name = "ecs_service_role_${var.environment}"
+    //    name = "ecs_service_role_${var.environment}"
     name = "terraform-20190926194703502800000001"
     assume_role_policy = data.template_file.ecs_service_role.rendered
 }
@@ -41,4 +41,3 @@ resource "aws_iam_role_policy" "ecs_service_role_policy" {
     role = aws_iam_role.ecs_service_role.id
     policy = data.template_file.ecs_service_role_policy.rendered
 }
-

@@ -23,7 +23,7 @@ terraform {
 inputs = {
   awsRegion = "eu-west-1"
   application_name = "apm"
-  environment = "dev"
+  environment = "qa"
   max_availability_zones = 2
   performance_level = "low"
   key_name = "ElavonApmGateway"

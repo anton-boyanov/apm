@@ -267,9 +267,10 @@ resource "aws_cloudwatch_metric_alarm" "scaleUpCPU" {
   period              = "120"
   statistic           = "Average"
   threshold           = "80"
-//  dimensions = {
-//    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
-//  }
+  dimensions = {
+    ServiceName = aws_ecs_service.ecs_service.name
+    ClusterName = local.cluster_name
+  }
   alarm_description = "This metric monitors task cpu utilization"
   alarm_actions     = [aws_appautoscaling_policy.cpuUp.arn]
 }
@@ -282,9 +283,10 @@ resource "aws_cloudwatch_metric_alarm" "scaleUpMemory" {
   period              = "120"
   statistic           = "Average"
   threshold           = "80"
-  //  dimensions = {
-  //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
-  //  }
+  dimensions = {
+    ServiceName = aws_ecs_service.ecs_service.name
+    ClusterName = local.cluster_name
+  }
   alarm_description = "This metric monitors task memory utilization"
   alarm_actions     = [aws_appautoscaling_policy.memUp.arn]
 }
@@ -297,9 +299,10 @@ resource "aws_cloudwatch_metric_alarm" "scaleDownCPU" {
   period              = "120"
   statistic           = "Average"
   threshold           = "40"
-  //  dimensions = {
-  //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
-  //  }
+  dimensions = {
+    ServiceName = aws_ecs_service.ecs_service.name
+    ClusterName = local.cluster_name
+  }
   alarm_description = "This metric monitors task cpu utilization"
   alarm_actions     = [aws_appautoscaling_policy.cpuDown.arn]
 }
@@ -312,9 +315,10 @@ resource "aws_cloudwatch_metric_alarm" "scaleDownMemory" {
   period              = "120"
   statistic           = "Average"
   threshold           = "40"
-  //  dimensions = {
-  //    AutoScalingGroupName = aws_appautoscaling_target.default.service_namespace
-  //  }
+  dimensions = {
+    ServiceName = aws_ecs_service.ecs_service.name
+    ClusterName = local.cluster_name
+  }
   alarm_description = "This metric monitors task memory utilization"
   alarm_actions     = [aws_appautoscaling_policy.memDown.arn]
 }
