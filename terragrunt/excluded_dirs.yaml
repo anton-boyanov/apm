@@ -1,0 +1,68 @@
+#------------------------------------------------------
+# Excluded Terragrunt directories
+#------------------------------------------------------
+
+# Excluded directories during terragrunt *-all commands. Absolute paths only. One directory per line.
+#
+# Example:
+# - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/key_pairs/main_ecs_cluster_nodes"
+#
+# Read more about the CLI Arg: --terragrunt-exclude-dir
+
+excluded_dirs:
+  # Exclude ECS Cluster resource
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ecs/clusters/main_ecs_cluster"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/autoscaling_groups/main_ecs_cluster_asg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/launch_templates/main_ecs_cluster_launch_template"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/iam/roles/main_ecs_cluster_role"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/main_ecs_cluster_sg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/key_pairs/main_ecs_cluster_nodes_key_pair"
+  # EC2 Temp Bastion
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/instances/temp_bastion"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/temp_bastion_sg"
+  # Route53 Internal zone
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/route_53/hosted_zones/internal_zone"
+  # ACM Internal zone
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/certificate_manager/certificates/internal_zone"
+  # ACM Top domain
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/certificate_manager/certificates/top_domain/acm_request"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/certificate_manager/certificates/top_domain/acm_validation"
+  # RDS
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/subnet_groups"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/parameter_groups"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/parameter_groups/backend-db-57_cluster-params"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/parameter_groups/backend-db-57_db-params"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/parameter_groups/apm-db_cluster-params"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/parameter_groups/apm-db_db-params"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/databases"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/databases/http-logs-db-indexed-57"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/databases/apm-db"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/rds/databases/backend-db-57"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/apm_db_sg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/http_logs_db_indexed_57_sg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/backend_db_57_sg"
+  # NLB Internal
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/load_balancers/nlb-internal"
+  # Public ALB
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/load_balancers/alb-public"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/alb_public_sg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/s3/alb_public_access_logs"
+  # Internal ALB
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/alb_internal_sg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/ec2/load_balancers/alb-internal"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/s3/alb_internal_access_logs"
+  # ElasticSearch
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/main_es_cluster_sg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/es/clusters/main_es_cluster"
+  # VPC
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/vpcs/vpc"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/security_groups/vpc_default_sg"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/route_tables/vpc_private_subnet_rtb"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/route_tables/vpc_public_subnet_rtb"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/elastic_ips/vpc_nat_eip"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/internet_gateways/vpc_igw"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/route_tables/vpc_main_rtb"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/network_acls/vpc_default_nacl"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/subnets/vpc_subnets"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/vpc/nat_gateways/vpc_nat_gw"
+  - "/terragrunt/apm/nonprod/dev/aws/eu-west-1/s3/vpc_flow_logs"

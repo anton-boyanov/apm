@@ -1,0 +1,7 @@
+#------------------------------------------------------
+# Environment specific variables 
+#------------------------------------------------------
+
+# Global variables
+environment: "dev"
+environment_main_aws_account_id: "TODO"

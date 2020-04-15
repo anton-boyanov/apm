@@ -1,33 +1,24 @@
-provider "aws" {
-  region = var.awsRegion
-}
-terraform {
-  # The configuration for this backend will be filled in by Terragrunt
-  backend "s3" {}
-  #required_version = "~>0.11.8"
-}
-
 # IAM
 module "iam" {
-  source      = "./iam"
+  source      = "modules\/aws\/iam"
   environment = var.environment
 }
 
 # Deploy networking resources
 module "network" {
-  source      = "./network"
+  source      = "modules\/aws\/network"
   environment = var.environment
 }
 
 # Deploy security groups resources
 module "security" {
-  source           = "./security"
+  source           = "modules\/aws\/security"
   application_name = var.application_name
   environment      = var.environment
 }
 # Create cluster logs
 module "create_cluster_logs" {
-  source                        = "./logs_cluster"
+  source                        = "modules\/aws\/logs_cluster"
   application_name              = var.application_name
   cloud_watch_retention_in_days = 1
   environment                   = var.environment
@@ -36,14 +27,14 @@ module "create_cluster_logs" {
 
 # ENVIRONMENT VARIABLES
 module "create_environment_variables" {
-  source      = "./environment_variables"
+  source      = "modules\/aws\/environment_variables"
   environment = var.environment
 }
 
 # Deploy compute resources
 
 module "ecs" {
-  source = "./ecs"
+  source = "modules\/aws\/ecs"
   cluster_minimum_size = 2
   cluster_maximum_size = 10
   max_availability_zones  = var.max_availability_zones
@@ -69,7 +60,7 @@ module "ecs" {
 }
 
 module "nginx" {
-  source = "./service_REPLICA"
+  source = "modules\/aws\/service_REPLICA"
   #--------------- ELB variables
   internal                      = false
   alb_port                      = 80
@@ -114,7 +105,7 @@ module "nginx" {
   }
 
 module "httpd" {
-  source = "./service_REPLICA"
+  source = "modules\/aws\/service_REPLICA"
   #--------------- ELB variables
   internal                      = false
   alb_port                      = 80
@@ -249,7 +240,7 @@ module "httpd" {
 //}
 //
 module "filebeat" {
-  source = "./service_DAEMON"
+  source = "modules\/aws\/service_DAEMON"
   #--------------- ELB variables
   internal            = true
   alb_port            = 80

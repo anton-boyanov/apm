@@ -1,0 +1,40 @@
+#------------------------------------------------------
+# Application specific variables 
+#------------------------------------------------------
+
+# Application name
+application: "apm"
+
+# Root AWS Account ID - Central AWS account containing non-environment, non-region specific resources
+root_aws_account_id: "TODO"
+
+# Top level domains used across regions
+top_domains:
+  prv:
+    dev: "NOT_ADDED_YET"
+    qa: "NOT_ADDED_YET"
+    uat: "NOT_ADDED_YET"
+  com:
+    dev: "NOT_ADDED_YET"
+    qa: "NOT_ADDED_YET"
+    prod: "NOT_ADDED_YET"
+
+# Top level domains - Route 53 Zone IDs (Only for Route53 Hosted Zones)
+top_domains_route_53_zone_ids:
+  gb:
+    wip: "NOT_ADDED_YET"
+    staging: "NOT_ADDED_YET"
+    prod: "NOT_ADDED_YET"
+  in:
+    wip: "NOT_ADDED_YET"
+    staging: "NOT_ADDED_YET"
+    prod: "NOT_ADDED_YET"
+
+# Global Route 53 Internal zone infix (i.e *.<env>.<infix>.<top_domain> -> *.wip.internal.apm.prv)
+internal_zone_infix: "internal"
+
+# Static resource tags (Overwrite them if needed in your terragrunt.OLD files)
+static_resource_tags:
+  confidentiality: "Internal"
+  owner: "Core infrastructure"
+  created_by: "Terraform"

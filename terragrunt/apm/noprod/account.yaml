@@ -1,0 +1,7 @@
+#------------------------------------------------------
+# Account specific variables 
+#------------------------------------------------------
+
+# Account details
+account_pretty_name: "apm"
+account_id: "TODO"

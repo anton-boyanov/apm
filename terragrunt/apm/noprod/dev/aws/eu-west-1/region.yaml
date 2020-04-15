@@ -1,0 +1,46 @@
+#------------------------------------------------------
+# Region specific variables 
+#------------------------------------------------------
+
+# Region details
+region: "eu-west-1"
+#region_country_code: "TODO"
+
+# VPC & Subnets
+vpcs_vpc_cidr: 10.0.0.0/16
+vpcs_vpc_private_subnets: 
+  - 10.0.1.0/24
+  - 10.0.2.0/24
+vpcs_vpc_public_subnets:
+  - 10.0.3.0/24
+  - 10.0.4.0/24
+
+# Main ECS Cluster
+ecs_main_cluster_instance_type: "t2.micro"
+ecs_main_cluster_volume_size: 30
+ecs_main_cluster_desired_capacity: 1
+ecs_main_cluster_min_instances: 1
+ecs_main_cluster_max_instances: 3
+ecs_main_cluster_key_pair_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCGp6oi4wTSQl8HABZ+CAJS5E8ChGbvoSjg6el1XHfDKxkYuEEFgFiz2oUK1vswutibTyLw1tmrjkmhBOzvjqtXIWgP0cVaSoBRifv2vF+ahiMsQ3q8DRiI4cr8NVCUkhf3BrIXjx3F8a2m+9dVFJKv9ky0tAGryZuy5N3iT8Wcogte8u9X8bfupuk1mJD1Vcw1khYAq8l1kubf2xfnznvjTVOrTAu00Y1pIOJQUbwR8bYX3DK6j5Ob2s/lpA7WLDsqpLzwRyGspqAm2xPtsHIlI5XpDAl6Mad8hCgU16xsyapfle6vMf+54DdOgYbnUFuFXnR9tTWyHFKc9dlwaWO1"
+ecs_main_cluster_enable_memory_autoscaling_policy: true
+ecs_main_cluster_enable_cpu_autoscaling_policy: true
+ecs_main_cluster_enable_containers_count_autoscaling_policy: true
+
+# RDS Configurations
+monitoring_interval:
+  backend-db-57: 60
+  http-logs-db-indexed-57: 60
+  tide-db: 60
+instance_type:
+  backend-db-57: "db.t2.small"
+  http-logs-db-indexed-57: "db.t2.small"
+  tide-db: "db.t2.small"
+num_instances:
+  backend-db-57: 1
+  http-logs-db-indexed-57: 1
+  tide-db: 1
+backup_retention_period:
+  backend-db-57: 1
+  http-logs-db-indexed-57: 1
+  tide-db: 1
+
